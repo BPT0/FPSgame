@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     // 필요한 컴포넌트
     [SerializeField]
     private Camera theCamera;
+    private GunController theGunController;
 
     [SerializeField]
     private Rigidbody myRigid;
@@ -50,6 +51,7 @@ public class PlayerController : MonoBehaviour
     {
         myRigid = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
+        theGunController = FindObjectOfType<GunController>();
         applySpeed = walkSpeed;
         originPosY = theCamera.transform.localPosition.y;
         applyCrouchPosY = originPosY;
@@ -157,6 +159,7 @@ public class PlayerController : MonoBehaviour
         // 달리기 실행시 앉기 취소
         if (isCrouch)
             Crouch();
+        theGunController.CancelFineSight();
         isRun = true;
         applySpeed = runSpeed;
     }
@@ -199,8 +202,8 @@ public class PlayerController : MonoBehaviour
         // clamp 함수로 사이의 값만을 사용
         currentCameraRotationX = Mathf.Clamp(currentCameraRotationX, -cameraRotationLimit, cameraRotationLimit);
         theCamera.transform.localEulerAngles = new Vector3(currentCameraRotationX, 0f, 0f);
-        Debug.Log(myRigid.rotation);
-        Debug.Log(myRigid.rotation.eulerAngles);
+        /*Debug.Log(myRigid.rotation);
+        Debug.Log(myRigid.rotation.eulerAngles);*/
     }
 
     // 좌우 케릭터 회전
