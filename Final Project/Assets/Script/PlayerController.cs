@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float crouchSpeed;
 
+    // 움직임 체크 변수
     [SerializeField]
     private float jumpForce;
 
@@ -46,6 +47,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody myRigid;
     private GunController theGunController;
     private Crosshair theCrosshair;
+    private StatusController theStatusController;
 
 
     // 땅 착지 여부 구별하기 위해 콜라이더 가져옴
@@ -57,6 +59,7 @@ public class PlayerController : MonoBehaviour
         capsuleCollider = GetComponent<CapsuleCollider>();
         theGunController = FindObjectOfType<GunController>();
         theCrosshair = FindObjectOfType<Crosshair>();
+        theStatusController = FindObjectOfType<StatusController>();
 
         // 초기화
         applySpeed = walkSpeed;
@@ -64,7 +67,8 @@ public class PlayerController : MonoBehaviour
         applyCrouchPosY = originPosY;
     }
 
-    void Update()
+
+    private void FixedUpdate()
     {
         IsGround();
         TryJump();
@@ -72,8 +76,11 @@ public class PlayerController : MonoBehaviour
         TryCrouch();
         Move();
         MoveCheck();
-        CameraRotation();
-        CharacterRotation();
+        if (!Inventory.inventoryActivated)
+        {
+            CameraRotation();
+            CharacterRotation();
+        }
     }
 
     // 앉기 시도
@@ -88,6 +95,11 @@ public class PlayerController : MonoBehaviour
     // 앉기 동작
     private void Crouch()
     {
+        if (isWalk)
+        {
+            isWalk = false;
+            theCrosshair.WalkingAnimation(isWalk);
+        }
         isCrouch = !isCrouch;
         theCrosshair.CrouchingAnimation(isCrouch);
         if (isCrouch)
@@ -128,13 +140,13 @@ public class PlayerController : MonoBehaviour
     {
         // 1.지면으로 콜라이더의 반지름만큼 y값 만큼 레이저 쏘기 +0.1f 여유를 준다
         isGround = Physics.Raycast(transform.position, Vector3.down, capsuleCollider.bounds.extents.y+0.1f);
-        theCrosshair.RunningAnimation(!isGround);
+        theCrosshair.JumpingAnimation(!isGround);
     }
 
     // 점프 시도
     private void TryJump()
     {
-        if(Input.GetKeyDown(KeyCode.Space) && isGround)
+        if(Input.GetKeyDown(KeyCode.Space) && isGround && theStatusController.GetCurrentSP()>0)
         {
             Jump();
         }
@@ -146,31 +158,52 @@ public class PlayerController : MonoBehaviour
         // 앉은상태 점프시 앉기 해제
         if (isCrouch)
             Crouch();
+        theStatusController.DecreaseStamina(100);
         myRigid.velocity = transform.up * jumpForce;
     }
 
     // 달리기 시도
     private void TryRun()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Vector3.Distance(lastPos, transform.position) >= 0.01f && Input.GetKey(KeyCode.LeftShift)
+            && theStatusController.GetCurrentSP() > 0)
         {
             Running();
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+
+        // 좌쉬프트 누르거나 이동중 키를 때면 런닝 취소
+        if (Input.GetKeyUp(KeyCode.LeftShift) || theStatusController.GetCurrentSP() <= 0)
         {
             RunningCancel();
         }
+        if (Input.GetKey(KeyCode.W) ||
+            Input.GetKey(KeyCode.A) ||
+            Input.GetKey(KeyCode.S) ||
+            Input.GetKey(KeyCode.D)) { }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.W) ||
+                Input.GetKeyUp(KeyCode.A) ||
+                Input.GetKeyUp(KeyCode.S) ||
+                Input.GetKeyUp(KeyCode.D))
+            {
+                RunningCancel();
+            }
+        }
+            
+        theCrosshair.RunningAnimation(isRun);
     }
 
     // 달리기 실행
     private void Running()
     {
-        // 달리기 실행시 앉기 취소
+        // 앉기, 정조준 모드 취소
         if (isCrouch)
             Crouch();
         theGunController.CancelFineSight();
         isRun = true;
         theCrosshair.RunningAnimation(isRun);
+        theStatusController.DecreaseStamina(10);
         applySpeed = runSpeed;
     }
 
@@ -189,7 +222,7 @@ public class PlayerController : MonoBehaviour
         float _moveDirX = Input.GetAxisRaw("Horizontal"); // x는 좌우
         float _moveDirZ = Input.GetAxisRaw("Vertical"); // z는 상하
 
-        // transform 객체가 가지고 있는 값
+        // transform 객체가 가지고 있는 값 
         // 마우스 입력값에 따라 좌우 상하 위치값 설정
         Vector3 _moveHorizontal = transform.right * _moveDirX;
         Vector3 _moveVertical = transform.forward * _moveDirZ;
@@ -239,5 +272,21 @@ public class PlayerController : MonoBehaviour
         myRigid.MoveRotation(myRigid.rotation * Quaternion.Euler(_characterRotationY));
     }
 
-
+    // 상태 변수 값 반환
+    public bool GetRun()
+    {
+        return isRun;
+    }
+    public bool GetWalk()
+    {
+        return isWalk;
+    }
+    public bool GetCrouch()
+    {
+        return isCrouch;
+    }
+    public bool GetIsGround()
+    {
+        return isGround;
+    }
 }
