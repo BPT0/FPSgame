@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static bool isPause = false;
 
+    private PauseMenu thePauseMenu;
+
     void Update()
     {
         if (isPause)

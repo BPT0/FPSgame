@@ -12,6 +12,7 @@ public class Inventory : MonoBehaviour
     private GameObject go_InventoryBase;
     [SerializeField]
     private GameObject go_SlotsParent;
+    private StartMsg theStartMsg;
 
     // 슬롯들
     private Slot[] slots;
@@ -76,5 +77,19 @@ public class Inventory : MonoBehaviour
                 return;
             }
         }
+
+        // 인벤토리 창에 돌, 사파이어, 자수정을 모을때마다 감소시켜줌
+        if (Item.ItemType.Ingredient == _item.itemType)
+        {
+            if (_item.itemName == "Rock")
+                theStartMsg.get_Rock();
+            if (_item.itemName == "Sapaier")
+                theStartMsg.get_Sapaier();
+            if (_item.itemName == "Amethyst")
+                theStartMsg.get_Amethyst();
+        }
+        theStartMsg.Check_All_Mining();
     }
+
+    
 }

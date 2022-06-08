@@ -21,7 +21,16 @@ public class Title : MonoBehaviour
     public void ClickExit()
     {
         Debug.Log("게임 종료");
-        Application.Quit();
+        ExitGame();
+        // Application.Quit();
+    }
+
+    private void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
     }
 }
-bn 

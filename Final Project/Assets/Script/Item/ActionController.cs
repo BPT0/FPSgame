@@ -21,6 +21,7 @@ public class ActionController : MonoBehaviour
     private Text actionText;
     [SerializeField]
     private Inventory theInventory;
+    
 
     void Update()
     {
@@ -74,4 +75,6 @@ public class ActionController : MonoBehaviour
         pickupActivated = false;
         actionText.gameObject.SetActive(false);
     }
+
+    // 광석 목표량을 다 모으면 자동으로 종료 시키는 함수
 }
