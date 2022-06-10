@@ -7,7 +7,7 @@ public class Timer : MonoBehaviour
 {
     // 타이머 관련 변수
     private float time_current; // 창이 활성화까지 남은 시간
-    private float time_Max = 30f; // 창의 활성화 시간
+    private float time_Max = 600f; // 창의 활성화 시간
     private bool isEnabled= false; // 타이머 텍스트 활성화 = false
 
     // 필요한 컴포넌트
@@ -55,7 +55,8 @@ public class Timer : MonoBehaviour
         Debug.Log("End");
         time_current = 0;
         isEnabled = true;
-        thePauseMenu.ClickExit();
+        if(!thePauseMenu)
+            thePauseMenu.ClickExit();
     }
 
     private void Reset_Timer()

@@ -12,6 +12,7 @@ public class Inventory : MonoBehaviour
     private GameObject go_InventoryBase;
     [SerializeField]
     private GameObject go_SlotsParent;
+    [SerializeField]
     private StartMsg theStartMsg;
 
     // 슬롯들
@@ -54,6 +55,7 @@ public class Inventory : MonoBehaviour
 
     public void AcquireItem(Item _item, int _count=1)
     {
+        // 획득한 아이템이 장비가 아니라면
         if (Item.ItemType.Equipment != _item.itemType)
         {
             for (int i = 0; i < slots.Length; i++)
@@ -63,10 +65,23 @@ public class Inventory : MonoBehaviour
                     if(slots[i].item.itemName == _item.itemName)
                     {
                         slots[i].SetSlotCount(_count);
+                        if (theStartMsg!=null)
+                        {
+                            Debug.Log("돌 획득");
+                            // 획득한 아이탬이 광석이면 숫자 감소
+                            if (_item.itemName == "Rock")
+                                theStartMsg.get_Rock();
+                            if (_item.itemName == "Sapaier")
+                                theStartMsg.get_Sapaier();
+                            if (_item.itemName == "Amethyst")
+                                theStartMsg.get_Amethyst();
+                            theStartMsg.Check_All_Mining();
+                        }
                         return;
                     }
                 }
             }
+            
         }
 
         for (int i = 0; i < slots.Length; i++)
@@ -77,18 +92,6 @@ public class Inventory : MonoBehaviour
                 return;
             }
         }
-
-        // 인벤토리 창에 돌, 사파이어, 자수정을 모을때마다 감소시켜줌
-        if (Item.ItemType.Ingredient == _item.itemType)
-        {
-            if (_item.itemName == "Rock")
-                theStartMsg.get_Rock();
-            if (_item.itemName == "Sapaier")
-                theStartMsg.get_Sapaier();
-            if (_item.itemName == "Amethyst")
-                theStartMsg.get_Amethyst();
-        }
-        theStartMsg.Check_All_Mining();
     }
 
     
